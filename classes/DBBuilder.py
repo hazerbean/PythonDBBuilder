@@ -57,8 +57,12 @@ class DBBuilder:
         cs = self.InitialiseConnection(engineUsed)
         try:
             StringInsertValue = self.StatementBuilderIntial.constructProcedureValues(Tablevalues)
-            StringInsertColumns = self.StatementBuilderIntial.constructProcedureColumns(Columns)
-            Statement= "call INSERTTABLECOLUMNS('"+Table+"',"+ StringInsertColumns +","+ StringInsertValue +")"
+            if len(ColumnsList) != 0:
+                StringInsertColumns = self.StatementBuilderIntial.constructProcedureColumns(Columns)
+                Statement= "call INSERTTABLECOLUMNS('"+Table+"',"+ StringInsertColumns +","+ StringInsertValue +")"
+            else:
+                Statement= "call INSERTTABLEVALUES('"+Table+"',"+ StringInsertValue +")"
+            
             print(Statement)
             cs.cursor().execute(Statement);
             cs.cursor().close()
