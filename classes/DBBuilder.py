@@ -53,7 +53,22 @@ class DBBuilder:
         except Exception as e:
             cs.close()
             return "failed" + str(e)
-
+    def insertProcedure(self,Table,Tablevalues,Columns= [],engineUsed=""):
+        cs = self.InitialiseConnection(engineUsed)
+        try:
+            StringInsertValue = self.StatementBuilderIntial.constructProcedureValues(Tablevalues)
+            StringInsertColumns = self.StatementBuilderIntial.constructProcedureColumns(Columns)
+            Statement= "call INSERTTABLECOLUMNS('"+Table+"',"+ StringInsertColumns +","+ StringInsertValue +")"
+            print(Statement)
+            cs.cursor().execute(Statement);
+            cs.cursor().close()
+            cs.close()
+    
+            return "worked"
+        except Exception as e:
+            cs.close()
+            return "failed" + str(e)
+        
     def SelectStatement(self,Table,ColumnsList =[],whereColumn="",whereValue="",WhereOperator="",engineUsed=""):
         cs = self.InitialiseConnection(engineUsed)
         statement=" "
