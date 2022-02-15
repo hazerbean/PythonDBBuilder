@@ -61,9 +61,7 @@ class DBBuilder:
                 StringInsertColumns = self.StatementBuilderIntial.constructProcedureColumns(Columns)
                 Statement= "call INSERTTABLECOLUMNS('"+Table+"',"+ StringInsertColumns +","+ StringInsertValue +")"
             else:
-                Statement= "call INSERTTABLEVALUES('"+Table+"',"+ StringInsertValue +")"
-            
-            print(Statement)
+                Statement= "call INSERTTABLEVALUES('"+Table+"',"+ StringInsertValue +")"            
             cs.cursor().execute(Statement);
             cs.cursor().close()
             cs.close()
@@ -95,7 +93,43 @@ class DBBuilder:
         except Exception as e:
             cs.close()
             return "failed " + str(e)
+        
+     def SelectProcedure(self,Table,ColumnsList =[],whereColumn="",whereValue="",WhereOperator="",engineUsed=""):
+        cs = self.InitialiseConnection(engineUsed)
+        statement=" "
+        
+        StringWhereValue = ""
+        StringWhereColumn = ""
+        StringWhereOperator = ""
+        try:
+            if whereColumn != "" and whereValue!="":
+                StringWhereValue = whereValue
+                StringWhereColumn = whereColumn
+                if WhereOperator !="":
+                    StringWhereOperator = WhereOperator
+                else:
+                    StringWhereOperator = "="
+            if len(ColumnsList) != 0:
+                StringSelectColumns = self.StatementBuilderIntial.constructProcedureColumns(ColumnsList)
+                Statement= "call SELECTTABLECOLUMNS('"+Table+"',"+ StringSelectColumns +",'"+StringWhereColumn+"',"+ StringWhereValue +",'"+WhereOperator+"')"
+            else:
+                Statement= "call SELECTTABLECOLUMNS('"+Table+"','','"+StringWhereColumn+"',"+ StringWhereValue +",'"+WhereOperator+"')"
 
+            DataTable = cs.cursor().execute(Statement);
+            cs.cursor().close()
+            cs.close()
+
+            if engineUsed=="MSSQLLocal":
+                ReturnedResult =  pd.DataFrame(DataTable)
+            else:
+                ReturnedResult = DataTable.fetchall()
+            DataTable.close()
+            cs.close()
+            self.InitialiseConnection.close()
+            return ReturnedResult
+        except Exception as e:
+            cs.close()
+            return "failed " + str(e)
 
     def updateStatement(self,Table,updateColumnsList,updateValues,whereColumn,whereValue,WhereOperator="",engineUsed="snowflake"):
         cs = self.InitialiseConnection(engineUsed)

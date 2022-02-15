@@ -13,8 +13,8 @@ try:
 
     #fetch result
 finally:
-   # print(deleteStatement)
+    #print(deleteStatement)
     #print(updateStatement)
     print(insertStatement)
     #print(selectStatement)
-   # print(selectStatement)
+    #print(selectStatement)
