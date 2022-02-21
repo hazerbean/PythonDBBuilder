@@ -5,12 +5,12 @@ import pandas as pd
 
 
 class DBBuilder:
-    userN='Haz'
-    passwordN='Erichobbs8'
-    accountN='bk63659.west-europe.azure'
-    warehouseN='COMPUTE_WH'
-    databaseN='DEMO'
-    schemaN='public'
+    userN=''
+    passwordN=''
+    accountN=''
+    warehouseN=''
+    databaseN=''
+    schemaN=''
     localSqlDB = '.\SQLEXPRESS'
     StatementBuilderIntial = StatementBuilder()
     
@@ -103,7 +103,7 @@ class DBBuilder:
         StringWhereOperator = ""
         try:
             if whereColumn != "" and whereValue!="":
-                StringWhereValue = whereValue
+                StringWhereValue =  self.StatementBuilderIntial.checkEqualType(whereValue)
                 StringWhereColumn = whereColumn
                 if WhereOperator !="":
                     StringWhereOperator = WhereOperator
@@ -157,4 +157,39 @@ class DBBuilder:
         except Exception as e:
             cs.close()
             return "failed " + str(e)
-   
+
+    def deleteProcedure(self,Table,whereColumn="",whereValue="",WhereOperator="",engineUsed=""):
+        cs = self.InitialiseConnection(engineUsed)
+        statement=" "
+        
+        StringWhereValue = ""
+        StringWhereColumn = ""
+        StringWhereOperator = ""
+        try:
+            if whereColumn != "" and whereValue!="":
+                StringWhereValue = self.StatementBuilderIntial.checkEqualType(whereValue)
+                StringWhereColumn = whereColumn
+                if WhereOperator !="":
+                    StringWhereOperator = WhereOperator
+                else:
+                    StringWhereOperator = "="
+            if StringWhereValue != "":
+                Statement= "call DELETETABLEVALUES('"+Table+"','"+StringWhereColumn+"','"+ StringWhereValue +"','"+WhereOperator+"')"
+            else:
+                Statement= "call DELETETABLEVALUES('"+Table+"','','','')"
+
+            DataTable = cs.cursor().execute(Statement);
+            cs.cursor().close()
+            cs.close()
+
+            if engineUsed=="MSSQLLocal":
+                ReturnedResult =  pd.DataFrame(DataTable)
+            else:
+                ReturnedResult = DataTable.fetchall()
+            DataTable.close()
+            cs.close()
+            self.InitialiseConnection.close()
+            return ReturnedResult
+        except Exception as e:
+            cs.close()
+            return "failed " + str(e)
