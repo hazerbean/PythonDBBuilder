@@ -9,21 +9,21 @@ class StatementBuilder:
         statement +=")"
         return statement
 
-    def BuildUpdateStatement(self,ColumnsList,Tablevalues):
+    def BuildUpdateStatement(self,ColumnsList,Tablevalues,CallType = ""):
         statement= ""
         i=0
         while i < len(ColumnsList):
             if (i) >= (len(ColumnsList)-1):
-                statement+= ColumnsList[i] + "="+ self.checkEqualType(Tablevalues[i])+""
+                statement+= ColumnsList[i] + "="+ self.checkEqualType(Tablevalues[i],CallType)+""
             else:
-                statement+= ColumnsList[i] + "="+ self.checkEqualType(Tablevalues[i])+","
+                statement+= ColumnsList[i] + "="+ self.checkEqualType(Tablevalues[i],CallType)+","
             i += 1
         return statement
     
-    def BuildWhere(self,whereColumn,whereValue,WhereOperator=""):
+    def BuildWhere(self,whereColumn,whereValue,WhereOperator="",CallType = ""):
         statement = " where " +whereColumn+ " "
         if WhereOperator !="":
-            statement += WhereOperator+ " " + self.checkEqualType(whereValue)  
+            statement += WhereOperator+ " " + self.checkEqualType(whereValue,CallType)  
         else:
             statement += "= " + self.checkEqualType(whereValue)
         return statement

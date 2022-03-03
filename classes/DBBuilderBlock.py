@@ -59,11 +59,13 @@ class DBBuilder:
         cs = self.InitialiseConnection(engineUsed)
         try:
             StringInsertValue = self.StatementBuilderIntial.constructProcedureValues(Tablevalues)
-            if len(ColumnsList) != 0:
+            if len(Columns) != 0:
                 StringInsertColumns = self.StatementBuilderIntial.constructProcedureColumns(Columns)
                 Statement= "call INSERTTABLECOLUMNS('"+Table+"',"+ StringInsertColumns +","+ StringInsertValue +")"
             else:
-                Statement= "call INSERTTABLEVALUES('"+Table+"',"+ StringInsertValue +")"            
+                Statement= "call INSERTTABLEVALUES('"+Table+"',"+ StringInsertValue +")"
+
+            print(Statement);
             cs.cursor().execute(Statement);
             cs.cursor().close()
             cs.close()
@@ -95,6 +97,7 @@ class DBBuilder:
         except Exception as e:
             cs.close()
             return "failed " + str(e)
+        
     def SelectProcedure(self,Table,ColumnsList =[],whereColumn="",whereValue="",WhereOperator="",engineUsed=""):
         cs = self.InitialiseConnection(engineUsed)
         statement=" "
@@ -147,6 +150,20 @@ class DBBuilder:
             cs.close()
             return "failed " + str(e)
 
+    def updateProcedure(self,Table,updateColumnsList,updateValues,whereColumn,whereValue,WhereOperator="",engineUsed="snowflake"):
+        cs = self.InitialiseConnection(engineUsed)
+        try: 
+            updateSet = self.StatementBuilderIntial.BuildUpdateStatement(updateColumnsList,updateValues,"Proc")
+            updateWhere = self.StatementBuilderIntial.BuildWhere(whereColumn,whereValue,WhereOperator,"Proc")
+            Statement= "call UPDATETABLEVALUES('"+Table+"','"+ updateSet +"','"+updateWhere+"')"
+            cs.cursor().execute(Statement);
+            cs.cursor().close()
+            cs.close()
+            return "worked"
+        except Exception as e:
+            cs.close()
+            return "failed " + str(e)
+        
     def deleteStatement(self,Table,whereColumn="",whereValue="",WhereOperator="",engineUsed="snowflake"):
         cs = self.InitialiseConnection(engineUsed)
         try:
