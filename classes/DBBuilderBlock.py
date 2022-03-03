@@ -1,6 +1,7 @@
 import snowflake.connector
 import pyodbc 
 from classes.StatementBuilder import StatementBuilder
+from classes.DataTableMaker import DataTableMaker
 import pandas as pd
 
 
@@ -13,6 +14,7 @@ class DBBuilder:
     schemaN=''
     localSqlDB = '.\SQLEXPRESS'
     StatementBuilderIntial = StatementBuilder()
+    DataTableMakerIntial = DataTableMaker()
     
     def InitialiseConnection(self, engineUsed="snowflake"):
         engine = None
@@ -93,11 +95,9 @@ class DBBuilder:
         except Exception as e:
             cs.close()
             return "failed " + str(e)
-        
-     def SelectProcedure(self,Table,ColumnsList =[],whereColumn="",whereValue="",WhereOperator="",engineUsed=""):
+    def SelectProcedure(self,Table,ColumnsList =[],whereColumn="",whereValue="",WhereOperator="",engineUsed=""):
         cs = self.InitialiseConnection(engineUsed)
         statement=" "
-        
         StringWhereValue = ""
         StringWhereColumn = ""
         StringWhereOperator = ""
@@ -106,7 +106,7 @@ class DBBuilder:
                 StringWhereValue =  self.StatementBuilderIntial.checkEqualType(whereValue)
                 StringWhereColumn = whereColumn
                 if WhereOperator !="":
-                    StringWhereOperator = WhereOperator
+                   StringWhereOperator = WhereOperator
                 else:
                     StringWhereOperator = "="
             if len(ColumnsList) != 0:
@@ -115,17 +115,19 @@ class DBBuilder:
             else:
                 Statement= "call SELECTTABLECOLUMNS('"+Table+"','','"+StringWhereColumn+"',"+ StringWhereValue +",'"+WhereOperator+"')"
 
-            DataTable = cs.cursor().execute(Statement);
-            cs.cursor().close()
-            cs.close()
+            ArrayOfJsons = cs.cursor().execute(Statement);
+            DataTableAss = self.DataTableMakerIntial.ArrayOfJsons(ArrayOfJsons)
 
             if engineUsed=="MSSQLLocal":
-                ReturnedResult =  pd.DataFrame(DataTable)
+                ReturnedResult =  pd.DataFrame(ArrayOfJsons)
+                ArrayOfJsons.close()
             else:
-                ReturnedResult = DataTable.fetchall()
-            DataTable.close()
+                DataTableAss = ArrayOfJsons.fetchall()
+                ReturnedResult = self.DataTableMakerIntial.ArrayOfJsons(DataTableAss)
+                ArrayOfJsons.close()
+            for element in ReturnedResult:
+                print(element)
             cs.close()
-            self.InitialiseConnection.close()
             return ReturnedResult
         except Exception as e:
             cs.close()
