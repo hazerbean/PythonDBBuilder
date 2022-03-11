@@ -6,12 +6,12 @@ import pandas as pd
 import json
 
 class DBBuilder:
-    userN='Haz'
-    passwordN='Erichobbs8'
-    accountN='bk63659.west-europe.azure'
-    warehouseN='COMPUTE_WH'
-    databaseN='DEMO'
-    schemaN='public'
+    userN=''
+    passwordN=''
+    accountN=''
+    warehouseN=''
+    databaseN=''
+    schemaN=''
     localSqlDB = '.\SQLEXPRESS'
     StatementBuilderIntial = StatementBuilder()
     DataTableMakerIntial = DataTableMaker()
