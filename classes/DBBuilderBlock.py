@@ -3,15 +3,15 @@ import pyodbc
 from classes.StatementBuilder import StatementBuilder
 from classes.DataTableMaker import DataTableMaker
 import pandas as pd
-
+import json
 
 class DBBuilder:
-    userN=''
-    passwordN=''
-    accountN=''
-    warehouseN=''
-    databaseN=''
-    schemaN=''
+    userN='Haz'
+    passwordN='Erichobbs8'
+    accountN='bk63659.west-europe.azure'
+    warehouseN='COMPUTE_WH'
+    databaseN='DEMO'
+    schemaN='public'
     localSqlDB = '.\SQLEXPRESS'
     StatementBuilderIntial = StatementBuilder()
     DataTableMakerIntial = DataTableMaker()
@@ -118,18 +118,20 @@ class DBBuilder:
             else:
                 Statement= "call SELECTTABLECOLUMNS('"+Table+"','','"+StringWhereColumn+"',"+ StringWhereValue +",'"+WhereOperator+"')"
 
-            ArrayOfJsons = cs.cursor().execute(Statement);
-            DataTableAss = self.DataTableMakerIntial.ArrayOfJsons(ArrayOfJsons)
+            ArrayCursor = cs.cursor().execute(Statement);
 
+                
             if engineUsed=="MSSQLLocal":
-                ReturnedResult =  pd.DataFrame(ArrayOfJsons)
-                ArrayOfJsons.close()
+                ReturnedResult =  pd.DataFrame(ArrayCursor);
+                ArrayCursor.close();
             else:
-                DataTableAss = ArrayOfJsons.fetchall()
-                ReturnedResult = self.DataTableMakerIntial.ArrayOfJsons(DataTableAss)
-                ArrayOfJsons.close()
-            for element in ReturnedResult:
-                print(element)
+                jsonString = ""
+                for c in ArrayCursor:
+                    jsonString = "".join(c)
+                jsonString = jsonString.replace("\n", " ")
+                jsonobject = json.loads(jsonString)
+                ReturnedResult = pd.json_normalize(jsonobject);
+                ArrayCursor.close();
             cs.close()
             return ReturnedResult
         except Exception as e:
